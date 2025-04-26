@@ -1,8 +1,10 @@
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from preflop_utils import get_rfi_action, get_facing_rfi_action, get_rfi_vs_3bet_action
 
 app = Flask(__name__)
+CORS(app, origins=["https://sosik.pythonanywhere.com"])
 
 @app.route('/invoke', methods=['POST'])
 def invoke():
