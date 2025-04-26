@@ -2,12 +2,13 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from preflop_utils import get_rfi_action, get_facing_rfi_action, get_rfi_vs_3bet_action
+from flop_helper import calculate_equity_multi
 
 app = Flask(__name__)
 CORS(app, origins=["https://sosik.pythonanywhere.com"])
 
-@app.route('/invoke', methods=['POST'])
-def invoke():
+@app.route('/preflop', methods=['POST'])
+def preflop():
     data = request.get_json(force=True)
     action = data.get('action')
 
@@ -37,6 +38,18 @@ def invoke():
     else:
         return jsonify({'error': f'Unknown action: {action}'}), 400
 
+    return jsonify({'result': result})
+
+
+@app.route('/flop', methods=['POST'])
+def flop():
+    data = request.get_json(force=True)
+    hole_cards = data.get('hole_cards')
+    board_cards = data.get('board_cards')
+    num_opponents = data.get('num_opponents')
+    result = calculate_equity_multi(hole_cards=hole_cards,
+                                    board_cards=board_cards,
+                                    num_opponents=num_opponents)
     return jsonify({'result': result})
 
 if __name__ == '__main__':
