@@ -71,6 +71,14 @@ def get_rfi_action(position: str, hole_cards: str) -> str:
             'K3o','K2o','Q5o','Q4o','Q3o','Q2o','J6o','T6o',
             '96o','86o','T5s','95s','85s','J4s','T4s','94s',
             '84s','74s','J3s','63s','53s','43s','J2s' 
+        },
+        'BB': {
+            'QQ','JJ','TT','99','88','AKs','AQs','AJs','ATs',
+            'KQs','KJs','QJs','AQo','AJo','ATo','KQo','KJo',
+            # Небольшая часть "блефовых" рук из синих клеток:
+            'K3o','K2o','Q5o','Q4o','Q3o','Q2o','J6o','T6o',
+            '96o','86o','T5s','95s','85s','J4s','T4s','94s',
+            '84s','74s','J3s','63s','53s','43s','J2s' 
         }
     }
 
@@ -92,10 +100,30 @@ def get_rfi_action(position: str, hole_cards: str) -> str:
         '98o','97o','87o','76o','65o'
     }
 
+    BB_CHECK = {
+        # Pairs
+        'AA','KK','77','66','55','44','33','22',
+        # Suited
+        'A9s','A8s','A7s','A6s','A5s','A4s','A3s','A2s',
+        'KTs','K9s','K8s','K7s','K6s','K5s','K4s','K3s','K2s',
+        'QTs','Q9s','Q8s','Q7s','Q6s','Q5s','Q4s','Q3s','Q2s',
+        'JTs','J9s','J8s','J7s','J6s','J5s','T9s','T8s','T7s',
+        'T6s','98s','97s','96s','87s','86s','76s','75s','65s',
+        '64s','54s','32s',
+        # Offsuit
+        'AKo','A9o','A8o','A7o','A6o','A5o','A4o','A3o','A2o',
+        'KTo','K9o','K8o','K7o','K6o','K5o','K4o',
+        'QJo','QTo','Q9o','Q8o','Q7o','Q6o',
+        'JTo','J9o','J8o','J7o','T9o','T8o','T7o',
+        '98o','97o','87o','76o','65o'
+    }
+
     if hole_cards in RAISE[position]:
             return 'Raise'
     elif position == 'SB' and hole_cards in SB_LIMP:
         return 'Limp'
+    elif position == 'BB' and hole_cards in BB_CHECK:
+        return 'Check'
     else:
         return 'Fold'
 
