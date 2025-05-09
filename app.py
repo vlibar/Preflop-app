@@ -13,10 +13,10 @@ def preflop():
     action = data.get('action')
 
     if action == 'rfi':
-        position = data.get('position')
+        your_position = data.get('your_position')
         hole_cards = data.get('hole_cards')
 
-        result = get_rfi_action(position=position,
+        result = get_rfi_action(position=your_position,
                                 hole_cards=hole_cards)
 
     elif action == 'facing_rfi':
