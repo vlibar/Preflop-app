@@ -1,50 +1,84 @@
 import eval7
-# from itertools import combinations
+import itertools
+import random
+from typing import List, Tuple
 
-
-def calculate_equity_multi(hole_cards, board_cards, num_opponents, simulations=10000):
+def generate_range(deck_cards: List[eval7.Card],
+                        nominal_hands: List[str]) -> List[Tuple[str, str]]:
     """
-    Monte Carlo-симуляция equity против num_opponents соперников,
-    с оценкой силы рук через eval7.evaluate().
+    Генерирует все конкретные комбинации карт из колоды, соответствующие заданным номинальным рукам.
 
-    :param hole_cards: list[str], например ['Ah','Kd']
-    :param board_cards: list[str], например ['Qs','Jh','2c']
-    :param num_opponents: int — число оппонентов
-    :param simulations: int — число раундов Monte Carlo
-    :return: float — equity (0.0–1.0)
+    :param deck_cards: список оставшихся карт (без карт игрока и борда)
+    :param nominal_hands: список номиналов, например ['AA', 'AKs', 'AQo', ...]
+    :return: список пар строковых представлений карт (e.g. [('Ah', 'Ad'), ('Ah', 'As'), ...])
     """
-    # 1. Преобразуем входные строки в объекты Card
-    hero = [eval7.Card(c) for c in hole_cards]  # :contentReference[oaicite:1]{index=1}
-    board = [eval7.Card(c) for c in board_cards]  # :contentReference[oaicite:2]{index=2}
+    combos: List[Tuple[str, str]] = []
+
+    for c1, c2 in itertools.combinations(deck_cards, 2):
+        r1, r2 = c1.rank, c2.rank
+        s1, s2 = c1.suit, c2.suit
+
+        # Определяем, какая карта старше
+        if r1 > r2:
+            high, low = c1, c2
+        else:
+            high, low = c2, c1
+        suited = (high.suit == low.suit)
+
+        nominal = str(high)[0] + str(low)[0] + ('s' if suited else 'o')
+        if nominal in nominal_hands:
+            combos.append((str(high), str(low)))
+    return combos
+
+
+def calculate_equity_multi(
+    hero_cards: List[str],
+    board_cards: List[str],
+    num_opponents: int,
+    opponent_combos: List[List[str]],
+    simulations: int = 5000,
+) -> float:
+    """
+    Оценивает equity героя против num_opponents оппонентов по Monte-Carlo.
+
+    :param hero_cards: ['Ah', 'Kd']
+    :param board_cards: ['Qs', 'Jh', '2c']
+    :param num_opponents: число оппонентов
+    :param opponent_combos: список всех допустимых рук оппонентов
+    :param simulations: число симуляций
+    :return: equity (0.0 - 1.0)
+    """
+    hero = [eval7.Card(c) for c in hero_cards]
+    board = [eval7.Card(c) for c in board_cards]
 
     wins = ties = 0
 
     for _ in range(simulations):
-        # 2. Готовим свежую колоду и убираем известные карты
-        deck = eval7.Deck()  # :contentReference[oaicite:3]{index=3}
-        for card in hero + board:
-            deck.cards.remove(card)
+        deck = eval7.Deck()
+        # Удаляем сразу все известные карты
+        to_remove = hero + board
+        # Выбираем случайные руки оппонентов
+        sampled = random.sample(opponent_combos, k=num_opponents)
+        opponents = [[eval7.Card(c) for c in hand] for hand in sampled]
+        # Добавляем карты оппонентов к списку удаления
+        for opp in opponents:
+            to_remove.extend(opp)
 
+        # Фильтрация колоды
+        deck.cards = [c for c in deck.cards if c not in to_remove]
         deck.shuffle()
 
-        # 3. Раздаём n оппонентам по 2 карты
-        opponents = [deck.deal(2) for _ in range(num_opponents)]
-
-        # 4. Досдаём борд до 5 карт
         sim_board = board + deck.deal(5 - len(board))
 
-        # 5. Собираем полные руки и оцениваем их
-        hero_score = eval7.evaluate(hero + sim_board)  # :contentReference[oaicite:4]{index=4}
-        opp_scores = [eval7.evaluate(opp + sim_board) for opp in opponents]  # :contentReference[oaicite:5]{index=5}
+        hero_score = eval7.evaluate(hero + sim_board)
+        opp_scores = [eval7.evaluate(opp + sim_board) for opp in opponents]
 
-        # 6. Считаем, выиграли ли мы
-        best = max([hero_score] + opp_scores)
-        if hero_score == best:
-            # Если есть ровно один минимальный скор — чистая победа
-            if ([hero_score] + opp_scores).count(best) == 1:
+        all_scores = [hero_score] + opp_scores
+        max_score = max(all_scores)
+        count_max = all_scores.count(max_score)
+        if hero_score == max_score:
+            if count_max == 1:
                 wins += 1
             else:
                 ties += 1
-
-    # 7. Equity по определению
-    return (wins + 0.5 * ties) / simulations
+    return (wins + ties * 0.5) / simulations
