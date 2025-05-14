@@ -54,7 +54,7 @@ def flop():
     for c in hole_cards + board_cards:
         try:
             deck.remove(eval7.Card(c))
-        except:
+        except ValueError:
             return jsonify({'result': 'Ошибка в переданных картах'})
 
     # 2. Определяем номинальный диапазон
