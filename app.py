@@ -52,7 +52,10 @@ def flop():
     # 1. Собираем колоду и удаляем известные карты
     deck = eval7.Deck().cards
     for c in hole_cards + board_cards:
-        deck.remove(eval7.Card(c))
+        try:
+            deck.remove(eval7.Card(c))
+        except:
+            return jsonify({'result': 'Ошибка в переданных картах'})
 
     # 2. Определяем номинальный диапазон
     opponent_range = [
