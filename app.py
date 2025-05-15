@@ -85,7 +85,7 @@ def flop():
     # 3. Генерируем все конкретные комбо в формате [['Ah','Ad'], …]
     opponent_combos = generate_range(deck, opponent_range)
 
-    result = calculate_equity_multi(hole_cards=hole_cards,
+    result = calculate_equity_multi(hero_cards=hole_cards,
                                     board_cards=board_cards,
                                     num_opponents=num_opponents,
                                     opponent_combos=opponent_combos
