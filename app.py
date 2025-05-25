@@ -30,7 +30,7 @@ def preflop():
 
     elif action == 'rfi_vs_3bet':
         your_position = data.get('your_position')
-        three_bet_position = data.get('three_bet_position')
+        three_bet_position = data.get('rfi_position')
         hole_cards = data.get('hole_cards')
         result = get_rfi_vs_3bet_action(your_position=your_position,
                                        three_bet_position=three_bet_position,
