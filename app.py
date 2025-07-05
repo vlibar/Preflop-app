@@ -6,7 +6,7 @@ from preflop_utils import get_rfi_action, get_facing_rfi_action, get_rfi_vs_3bet
 from flop_helper import calculate_equity_multi, generate_range
 
 app = Flask(__name__)
-CORS(app, origins=["https://sosik.pythonanywhere.com", "https://play.tonpoker.online"])
+CORS(app, origins=["https://sosik.pythonanywhere.com", "https://play.tonpoker.online", "https://play2.tonpoker.online"])
 
 @app.route('/preflop', methods=['POST'])
 def preflop():
